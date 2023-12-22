@@ -17,7 +17,7 @@ cargo test -- --nocapture
 
 ## Current status
 
-Due to zombienet-sdk (limitations)[https://github.com/paritytech/zombienet-sdk/pull/145], we use a branch of it with some fixes applied.
+Due to zombienet-sdk [limitations](https://github.com/paritytech/zombienet-sdk/pull/145), we use a branch of it with some fixes applied.
 
 As of time of this writing (Dec 2023), zombienet-sdk only supports running
 tests with a native provider. This is why the tests are not integrated into
