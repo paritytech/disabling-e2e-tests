@@ -1,0 +1,14 @@
+[package]
+name = "disabling-e2e-tests"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde_json = "1.0.108"
+subxt = { version = "0.32.0", default-features = false, features = ["native"] }
+tokio = "1.35.0"
+tracing-subscriber = "0.3.18"
+zombienet-sdk = { git = "https://github.com/paritytech/zombienet-sdk", rev = "9ba4b13" }
+
+[patch."https://github.com/paritytech/zombienet-sdk"]
+zombienet-sdk = { path = "../zombienet-sdk/crates/sdk" }
