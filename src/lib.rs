@@ -154,7 +154,7 @@ pub async fn wait_for_block(
 pub async fn wait_for_metric(node: &NetworkNode, metric: &str, value: u64) -> Result<(), Error> {
     println!("Waiting for {metric} to reach {value}:");
     loop {
-        let current = node.reports(metric).await? as u64;
+        let current = node.reports(metric).await.unwrap_or(0.0) as u64;
         println!("{metric} = {current}");
         if current >= value {
             return Ok(());

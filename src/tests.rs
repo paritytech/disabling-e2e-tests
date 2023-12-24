@@ -1,6 +1,8 @@
 use crate::*;
 
 const DISPUTES_TOTAL_METRIC: &str = "polkadot_parachain_candidate_disputes_total";
+const DISPUTES_CONCLUDED_VALID: &str =
+    "polkadot_parachain_candidate_dispute_concluded{validity=\"valid\"}";
 
 #[tokio::test]
 async fn test_backing_disabling() -> Result<(), Error> {
@@ -72,7 +74,7 @@ async fn test_disputes_offchain_disabling() -> Result<(), Error> {
 
     wait_for_block(1, collator_client).await?;
 
-    wait_for_metric(honest, DISPUTES_TOTAL_METRIC, 1).await?;
+    wait_for_metric(honest, DISPUTES_CONCLUDED_VALID, 1).await?;
 
     // NOTE: there's a race condition possible
     // after the dispute concluded and before the validator got disabled
@@ -80,12 +82,12 @@ async fn test_disputes_offchain_disabling() -> Result<(), Error> {
     sleep(Duration::from_secs(6)).await;
 
     // get the current disputes metric
-    let total_disputes = honest.reports(DISPUTES_TOTAL_METRIC).await? as u64;
+    let total_disputes = honest.reports(DISPUTES_CONCLUDED_VALID).await? as u64;
 
     // wait a bit
     sleep(Duration::from_secs(120)).await;
 
-    let new_total_disputes = honest.reports(DISPUTES_TOTAL_METRIC).await? as u64;
+    let new_total_disputes = honest.reports(DISPUTES_CONCLUDED_VALID).await? as u64;
 
     // ensure that no new disputes were created after validator got disabled offchain
     assert_eq!(total_disputes, new_total_disputes);
