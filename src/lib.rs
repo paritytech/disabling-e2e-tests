@@ -21,7 +21,7 @@ pub fn runtime_config() -> serde_json::Value {
         "configuration": {
             "config": {
                 "max_validators_per_core": 1,
-                "needed_approvals": 2,
+                "needed_approvals": 1,
                 "group_rotation_frequency": 10
             }
         }
@@ -94,6 +94,9 @@ pub async fn spawn_network_dispute_valid() -> Result<Network<LocalFileSystem>, E
                 .with_node(|node| node.with_name("honest-3"))
                 .with_node(|node| node.with_name("honest-4"))
                 .with_node(|node| node.with_name("honest-5"))
+                .with_node(|node| node.with_name("honest-6"))
+                .with_node(|node| node.with_name("honest-7"))
+                .with_node(|node| node.with_name("honest-8"))
                 .with_node(|node| {
                     node.with_name("malicious-disputer")
                         .with_command("malus")
