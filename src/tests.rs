@@ -83,7 +83,7 @@ async fn test_disputes_offchain_disabling() -> Result<(), Error> {
     let total_disputes = honest.reports(DISPUTES_TOTAL_METRIC).await? as u64;
 
     // wait a bit
-    sleep(Duration::from_secs(60)).await;
+    sleep(Duration::from_secs(120)).await;
 
     let new_total_disputes = honest.reports(DISPUTES_TOTAL_METRIC).await? as u64;
 

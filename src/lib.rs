@@ -42,6 +42,7 @@ pub async fn spawn_network_malus_backer() -> Result<Network<LocalFileSystem>, Er
                 .with_genesis_overrides(patch)
                 .with_default_command("polkadot")
                 .with_default_args(vec![
+                    "--no-hardware-benchmarks".into(),
                     "--insecure-validator-i-know-what-i-do".into(),
                     "-lparachain=debug".into(),
                 ])
@@ -53,6 +54,7 @@ pub async fn spawn_network_malus_backer() -> Result<Network<LocalFileSystem>, Er
                         .with_command("malus")
                         .with_subcommand("suggest-garbage-candidate")
                         .with_args(vec![
+                            "--no-hardware-benchmarks".into(),
                             "--insecure-validator-i-know-what-i-do".into(),
                             "-lMALUS=trace".into(),
                         ])
@@ -82,8 +84,9 @@ pub async fn spawn_network_dispute_valid() -> Result<Network<LocalFileSystem>, E
                 .with_genesis_overrides(patch)
                 .with_default_command("polkadot")
                 .with_default_args(vec![
+                    "--no-hardware-benchmarks".into(),
                     "--insecure-validator-i-know-what-i-do".into(),
-                    "-lparachain=debug".into(),
+                    "-lparachain=debug,parachain::dispute-coordinator=trace".into(),
                 ])
                 .with_node(|node| node.with_name("honest-0"))
                 .with_node(|node| node.with_name("honest-1"))
@@ -96,6 +99,7 @@ pub async fn spawn_network_dispute_valid() -> Result<Network<LocalFileSystem>, E
                         .with_command("malus")
                         .with_subcommand("dispute-ancestor")
                         .with_args(vec![
+                            "--no-hardware-benchmarks".into(),
                             "--insecure-validator-i-know-what-i-do".into(),
                             "-lMALUS=trace".into(),
                         ])
