@@ -1,3 +1,5 @@
+use std::future::Future;
+
 use crate::*;
 
 const DISPUTES_TOTAL_METRIC: &str = "polkadot_parachain_candidate_disputes_total";
@@ -6,10 +8,26 @@ const DISPUTES_CONCLUDED_VALID: &str =
 
 #[tokio::test]
 async fn test_backing_disabling() -> Result<(), Error> {
-    tracing_subscriber::fmt::init();
+    test_backing_with_setup(async {
+        tracing_subscriber::fmt::init();
+        spawn_network_malus_backer().await
+    })
+    .await
+}
 
-    let network = spawn_network_malus_backer().await?;
+#[tokio::test]
+async fn test_backing_and_statement_distribution_disabling() -> Result<(), Error> {
+    test_backing_with_setup(async {
+        tracing_subscriber::fmt::init();
+        spawn_network_malus_statement_distribution().await
+    })
+    .await
+}
 
+async fn test_backing_with_setup(
+    network_setup: impl Future<Output = Result<Network<LocalFileSystem>, Error>>,
+) -> Result<(), Error> {
+    let network = network_setup.await?;
     println!("🚀🚀🚀 network deployed");
 
     let honest = network.get_node("honest-0")?;
