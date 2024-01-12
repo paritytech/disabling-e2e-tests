@@ -1,1 +1,4 @@
 /target
+/artifacts/westend_runtime.compact.compressed.wasm
+/artifacts/polkadot-1.6
+/artifacts/polkadot-disabling
