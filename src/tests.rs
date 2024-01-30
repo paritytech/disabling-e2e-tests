@@ -100,6 +100,8 @@ async fn test_disputes_offchain_disabling() -> Result<(), Error> {
 // The test is intend to work with pre-disabling binaries (e.g. polkadot 1.6) and to test a runtime
 // upgrade with a runtime from https://github.com/paritytech/polkadot-sdk/pull/2226.
 // The test expects pre-disabling binaries to be in system PATH before running it.
+// The test mimics what is likely to happen in the real deployment - old nodes get updated first and
+// then a runtime upgrade is performed.
 #[tokio::test]
 async fn test_runtime_upgrade() -> Result<(), Error> {
     tracing_subscriber::fmt::init();
@@ -137,6 +139,53 @@ async fn test_runtime_upgrade() -> Result<(), Error> {
     // Put a runtime from the disabling branch compiled with 'fast runtime'
     // as artifacts/westend_runtime.compact.compressed.wasm
     // compile command: `cargo build --release --features=fast-runtime -p westend-runtime`
+    let code = std::fs::read(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("artifacts/westend_runtime.compact.compressed.wasm"),
+    )?;
+
+    println!("Starting runtime upgrade");
+    perform_runtime_upgrade(&client, code).await?;
+    println!("🚀🚀🚀 runtime upgrade complete");
+
+    assert_blocks_are_being_finalized(&client).await?;
+
+    // get runtime version after the upgrade - is it newer?
+    let version_after = get_runtime_version(&client).await?;
+    assert!(version_after.spec_version > version_before.spec_version);
+
+    // still no disputes
+    wait_for_metric(honest, DISPUTES_CONCLUDED_VALID, 0).await?;
+
+    Ok(())
+}
+
+// All prereqs for `test_runtime_upgrade` are valid here too.
+// The test performs runtime upgrade with old client nodes. They should work fine with the new runtime.
+#[tokio::test]
+async fn test_runtime_upgrade_with_old_client() -> Result<(), Error> {
+    tracing_subscriber::fmt::init();
+
+    let network = spawn_honest_network().await?;
+
+    println!("🚀🚀🚀 network deployed");
+
+    let honest = network.get_node("honest-0")?;
+    let role = honest.reports("node_roles").await?;
+    assert_eq!(role as u64, 4);
+
+    // No disputes in honest network
+    wait_for_metric(honest, DISPUTES_CONCLUDED_VALID, 0).await?;
+
+    let client = get_client(&network, "honest-0").await?;
+
+    // Netowrk is still healthy
+    assert_blocks_are_being_finalized(&client).await?;
+
+    // get runtime version before the upgrade
+    let version_before = get_runtime_version(&client).await?;
+
+    // runtime upgrade
     let code = std::fs::read(
         Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("artifacts/westend_runtime.compact.compressed.wasm"),
