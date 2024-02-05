@@ -216,7 +216,6 @@ async fn assert_blocks_are_being_finalized(
         .await
         .ok_or(Error::from("Can't get finalized block from stream"))??
         .number();
-    sleep(Duration::from_secs(30)).await;
     let second_measurement = finalized_blocks
         .next()
         .await
