@@ -88,7 +88,7 @@ async fn test_disputes_offchain_disabling() -> Result<(), Error> {
     let role = honest.reports("node_roles").await?;
     assert_eq!(role as u64, 4);
 
-    let collator_client = get_client(&network, "collator").await?;
+    let collator_client = get_client(&network, "collator2001").await?;
 
     wait_for_block(1, collator_client).await?;
 
@@ -103,7 +103,7 @@ async fn test_disputes_offchain_disabling() -> Result<(), Error> {
     let total_disputes = honest.reports(DISPUTES_CONCLUDED_VALID).await? as u64;
 
     // wait a bit
-    sleep(Duration::from_secs(120)).await;
+    sleep(Duration::from_secs(60)).await;
 
     let new_total_disputes = honest.reports(DISPUTES_CONCLUDED_VALID).await? as u64;
 

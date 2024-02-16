@@ -129,7 +129,15 @@ pub async fn spawn_network_malus_statement_distribution() -> Result<Network<Loca
 pub async fn spawn_network_dispute_valid() -> Result<Network<LocalFileSystem>, Error> {
     let network = NetworkConfigBuilder::new()
         .with_relaychain(|r| {
-            let patch = runtime_config();
+            let patch = json!({
+                "configuration": {
+                    "config": {
+                        "max_validators_per_core": 1,
+                        "needed_approvals": 8,
+                        "group_rotation_frequency": 10
+                    }
+                }
+            });
 
             r.with_chain("westend-local")
                 .with_genesis_overrides(patch)
@@ -163,7 +171,19 @@ pub async fn spawn_network_dispute_valid() -> Result<Network<LocalFileSystem>, E
             p.with_id(2000)
                 .cumulus_based(true)
                 .with_registration_strategy(RegistrationStrategy::InGenesis)
-                .with_collator(|n| n.with_name("collator").with_command("polkadot-parachain"))
+                .with_collator(|n| {
+                    n.with_name("collator2000")
+                        .with_command("polkadot-parachain")
+                })
+        })
+        .with_parachain(|p| {
+            p.with_id(2001)
+                .cumulus_based(true)
+                .with_registration_strategy(RegistrationStrategy::InGenesis)
+                .with_collator(|n| {
+                    n.with_name("collator2001")
+                        .with_command("polkadot-parachain")
+                })
         })
         .build()
         .unwrap()
