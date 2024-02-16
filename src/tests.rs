@@ -1,4 +1,6 @@
 use std::future::Future;
+use std::time::Duration;
+use tokio::time::sleep;
 
 use crate::*;
 use std::env;
@@ -102,6 +104,11 @@ async fn test_disputes_offchain_disabling() -> Result<(), Error> {
 
     // ensure that no new disputes were created after validator got disabled offchain
     assert_eq!(total_disputes, new_total_disputes);
+
+    // wait a bit
+    sleep(Duration::from_secs(60)).await;
+    let client = get_client(&network, "honest-0").await?;
+    assert_finality_is_not_lagging(&client).await?;
 
     Ok(())
 }
@@ -232,6 +239,27 @@ async fn assert_blocks_are_being_finalized(
         .number();
 
     assert!(second_measurement > first_measurement);
+
+    Ok(())
+}
+
+async fn assert_finality_is_not_lagging(
+    client: &OnlineClient<PolkadotConfig>,
+) -> Result<(), Error> {
+    let mut finalized_blocks = client.blocks().subscribe_finalized().await?;
+    let finalized = finalized_blocks
+        .next()
+        .await
+        .ok_or(Error::from("Can't get finalized block from stream"))??
+        .number();
+    let mut best_blocks = client.blocks().subscribe_best().await?;
+    let best = best_blocks
+        .next()
+        .await
+        .ok_or(Error::from("Can't get best block from stream"))??
+        .number();
+
+    assert!(best.saturating_sub(finalized) < 10);
 
     Ok(())
 }

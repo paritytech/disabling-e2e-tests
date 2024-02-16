@@ -1,9 +1,6 @@
-use std::time::Duration;
-
 use serde_json::json;
 use subxt::{OnlineClient, PolkadotConfig};
 use subxt_signer::sr25519::dev;
-use tokio::time::sleep;
 use zombienet_sdk::{
     LocalFileSystem, Network, NetworkConfigBuilder, NetworkConfigExt, NetworkNode,
     RegistrationStrategy,
