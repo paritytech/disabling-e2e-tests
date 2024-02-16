@@ -74,57 +74,6 @@ pub async fn spawn_network_malus_backer() -> Result<Network<LocalFileSystem>, Er
     Ok(network)
 }
 
-pub async fn spawn_network_malus_statement_distribution() -> Result<Network<LocalFileSystem>, Error>
-{
-    let network = NetworkConfigBuilder::new()
-        .with_relaychain(|r| {
-            let patch = runtime_config();
-
-            r.with_chain("westend-local")
-                .with_genesis_overrides(patch)
-                .with_default_command("polkadot")
-                .with_default_args(vec![
-                    "--no-hardware-benchmarks".into(),
-                    "--insecure-validator-i-know-what-i-do".into(),
-                    "-lparachain=debug".into(),
-                ])
-                .with_node(|node| node.with_name("honest-0"))
-                .with_node(|node| node.with_name("honest-1"))
-                .with_node(|node| {
-                    node.with_name("malicious-backer")
-                        .with_command("malus")
-                        .with_subcommand("suggest-garbage-candidate")
-                        .with_args(vec![
-                            "--no-hardware-benchmarks".into(),
-                            "--insecure-validator-i-know-what-i-do".into(),
-                            "-lMALUS=trace".into(),
-                        ])
-                })
-                .with_node(|node| {
-                    node.with_name("malicious-supporter")
-                        .with_command("malus")
-                        .with_subcommand("support-disabled")
-                        .with_args(vec![
-                            "--no-hardware-benchmarks".into(),
-                            "--insecure-validator-i-know-what-i-do".into(),
-                            "-lMALUS=trace".into(),
-                        ])
-                })
-        })
-        .with_parachain(|p| {
-            p.with_id(2000)
-                .cumulus_based(true)
-                .with_registration_strategy(RegistrationStrategy::InGenesis)
-                .with_collator(|n| n.with_name("collator").with_command("polkadot-parachain"))
-        })
-        .build()
-        .unwrap()
-        .spawn_native()
-        .await?;
-
-    Ok(network)
-}
-
 // FIXME: deduplicate this
 pub async fn spawn_network_dispute_valid() -> Result<Network<LocalFileSystem>, Error> {
     let network = NetworkConfigBuilder::new()

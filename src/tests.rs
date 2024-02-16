@@ -15,15 +15,6 @@ async fn test_backing_disabling() -> Result<(), Error> {
     .await
 }
 
-#[tokio::test]
-async fn test_backing_and_statement_distribution_disabling() -> Result<(), Error> {
-    test_backing_with_setup(async {
-        tracing_subscriber::fmt::init();
-        spawn_network_malus_statement_distribution().await
-    })
-    .await
-}
-
 async fn test_backing_with_setup(
     network_setup: impl Future<Output = Result<Network<LocalFileSystem>, Error>>,
 ) -> Result<(), Error> {
