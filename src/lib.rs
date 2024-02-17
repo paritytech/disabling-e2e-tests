@@ -80,7 +80,7 @@ pub async fn spawn_network_dispute_valid() -> Result<Network<LocalFileSystem>, E
                 "configuration": {
                     "config": {
                         "max_validators_per_core": 1,
-                        "needed_approvals": 8,
+                        "needed_approvals": 1,
                         "group_rotation_frequency": 10
                     }
                 }
