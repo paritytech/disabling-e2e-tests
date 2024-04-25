@@ -15,6 +15,7 @@ async fn test_backing_disabling() -> Result<(), Error> {
     let network = spawn_network_malus_backer().await?;
 
     println!("🚀🚀🚀 network deployed");
+    sleep(Duration::from_secs(30)).await;
 
     let honest = network.get_node("honest-0")?;
     let role = honest.reports("node_roles").await?;
@@ -69,6 +70,7 @@ async fn test_disputes_offchain_disabling() -> Result<(), Error> {
     let network = spawn_network_dispute_valid().await?;
 
     println!("🚀🚀🚀 network deployed");
+    sleep(Duration::from_secs(30)).await;
 
     let honest = network.get_node("honest-0")?;
     let role = honest.reports("node_roles").await?;
@@ -89,7 +91,7 @@ async fn test_disputes_offchain_disabling() -> Result<(), Error> {
     let total_disputes = honest.reports(DISPUTES_CONCLUDED_VALID).await? as u64;
 
     // wait a bit
-    sleep(Duration::from_secs(120)).await;
+    sleep(Duration::from_secs(60)).await;
 
     let new_total_disputes = honest.reports(DISPUTES_CONCLUDED_VALID).await? as u64;
 
@@ -111,6 +113,7 @@ async fn test_runtime_upgrade() -> Result<(), Error> {
     let network = spawn_honest_network().await?;
 
     println!("🚀🚀🚀 network deployed");
+    sleep(Duration::from_secs(60)).await;
 
     let honest = network.get_node("honest-0")?;
     let role = honest.reports("node_roles").await?;
@@ -126,6 +129,7 @@ async fn test_runtime_upgrade() -> Result<(), Error> {
     // assert_eq!(honest.reports("substrate_build_info{name=\"honest-0\",version=\"1.6.0-481165d9229\",chain=\"westend_local_testnet\"}").await?, 1_f64);
 
     perform_nodes_upgrade(&network).await?;
+    sleep(Duration::from_secs(60)).await;
 
     let client = get_client(&network, "honest-0").await?;
     // ensure new binary is running - see the comment for 'ensure old binary is running'
@@ -171,6 +175,7 @@ async fn test_runtime_upgrade_with_old_client() -> Result<(), Error> {
     let network = spawn_honest_network().await?;
 
     println!("🚀🚀🚀 network deployed");
+    sleep(Duration::from_secs(60)).await;
 
     let honest = network.get_node("honest-0")?;
     let role = honest.reports("node_roles").await?;
