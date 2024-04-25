@@ -18,9 +18,11 @@ pub fn runtime_config() -> serde_json::Value {
     json!({
         "configuration": {
             "config": {
-                "max_validators_per_core": 1,
                 "needed_approvals": 1,
-                "group_rotation_frequency": 10
+                "group_rotation_frequency": 10,
+                "scheduler_params": {
+                    "max_validators_per_core": 1,
+                }
             }
         }
     })
@@ -41,7 +43,6 @@ pub async fn spawn_network_malus_backer() -> Result<Network<LocalFileSystem>, Er
                 .with_default_command("polkadot")
                 .with_default_args(vec![
                     "--no-hardware-benchmarks".into(),
-                    "--insecure-validator-i-know-what-i-do".into(),
                     "-lparachain=debug".into(),
                 ])
                 .with_node(|node| node.with_name("honest-0"))
@@ -53,7 +54,6 @@ pub async fn spawn_network_malus_backer() -> Result<Network<LocalFileSystem>, Er
                         .with_subcommand("suggest-garbage-candidate")
                         .with_args(vec![
                             "--no-hardware-benchmarks".into(),
-                            "--insecure-validator-i-know-what-i-do".into(),
                             "-lMALUS=trace".into(),
                         ])
                 })
@@ -83,7 +83,6 @@ pub async fn spawn_network_dispute_valid() -> Result<Network<LocalFileSystem>, E
                 .with_default_command("polkadot")
                 .with_default_args(vec![
                     "--no-hardware-benchmarks".into(),
-                    "--insecure-validator-i-know-what-i-do".into(),
                     "-lparachain=debug,parachain::dispute-coordinator=trace".into(),
                 ])
                 .with_node(|node| node.with_name("honest-0"))
@@ -101,7 +100,6 @@ pub async fn spawn_network_dispute_valid() -> Result<Network<LocalFileSystem>, E
                         .with_subcommand("dispute-ancestor")
                         .with_args(vec![
                             "--no-hardware-benchmarks".into(),
-                            "--insecure-validator-i-know-what-i-do".into(),
                             "-lMALUS=trace".into(),
                         ])
                 })
@@ -131,7 +129,6 @@ pub async fn spawn_honest_network() -> Result<Network<LocalFileSystem>, Error> {
                 .with_default_command("polkadot")
                 .with_default_args(vec![
                     "--no-hardware-benchmarks".into(),
-                    "--insecure-validator-i-know-what-i-do".into(),
                     "-lparachain=debug,parachain::dispute-coordinator=trace".into(),
                 ])
                 .with_node(|node| node.with_name("honest-0"))
