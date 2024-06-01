@@ -1,3 +1,7 @@
+use std::future::Future;
+use std::time::Duration;
+use tokio::time::sleep;
+
 use crate::*;
 use std::env;
 use std::path::Path;
@@ -10,10 +14,17 @@ const DISPUTES_CONCLUDED_VALID: &str =
 
 #[tokio::test]
 async fn test_backing_disabling() -> Result<(), Error> {
-    tracing_subscriber::fmt::init();
+    test_backing_with_setup(async {
+        tracing_subscriber::fmt::init();
+        spawn_network_malus_backer().await
+    })
+    .await
+}
 
-    let network = spawn_network_malus_backer().await?;
-
+async fn test_backing_with_setup(
+    network_setup: impl Future<Output = Result<Network<LocalFileSystem>, Error>>,
+) -> Result<(), Error> {
+    let network = network_setup.await?;
     println!("🚀🚀🚀 network deployed");
     sleep(Duration::from_secs(30)).await;
 
@@ -76,7 +87,7 @@ async fn test_disputes_offchain_disabling() -> Result<(), Error> {
     let role = honest.reports("node_roles").await?;
     assert_eq!(role as u64, 4);
 
-    let collator_client = get_client(&network, "collator").await?;
+    let collator_client = get_client(&network, "collator2001").await?;
 
     wait_for_block(1, collator_client).await?;
 
@@ -97,6 +108,11 @@ async fn test_disputes_offchain_disabling() -> Result<(), Error> {
 
     // ensure that no new disputes were created after validator got disabled offchain
     assert_eq!(total_disputes, new_total_disputes);
+
+    // wait a bit
+    sleep(Duration::from_secs(60)).await;
+    let client = get_client(&network, "honest-0").await?;
+    assert_finality_is_not_lagging(&client).await?;
 
     Ok(())
 }
@@ -230,6 +246,27 @@ async fn assert_blocks_are_being_finalized(
         .number();
 
     assert!(second_measurement > first_measurement);
+
+    Ok(())
+}
+
+async fn assert_finality_is_not_lagging(
+    client: &OnlineClient<PolkadotConfig>,
+) -> Result<(), Error> {
+    let mut finalized_blocks = client.blocks().subscribe_finalized().await?;
+    let finalized = finalized_blocks
+        .next()
+        .await
+        .ok_or(Error::from("Can't get finalized block from stream"))??
+        .number();
+    let mut best_blocks = client.blocks().subscribe_best().await?;
+    let best = best_blocks
+        .next()
+        .await
+        .ok_or(Error::from("Can't get best block from stream"))??
+        .number();
+
+    assert!(best.saturating_sub(finalized) < 10);
 
     Ok(())
 }
